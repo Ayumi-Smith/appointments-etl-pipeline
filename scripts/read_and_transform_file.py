@@ -2,9 +2,9 @@ import pandas as pd
 import logging
 import datetime
 
-def read_file(filepath):
+def read_csv_file(filepath):
     try:
-        df = pd.read_csv(filepath)
+        df = pd.read_csv(filepath) #if the files are big can be improved by reading in chunks
     except Exception as e:
         logging.error(f'Failed to read CSV at {filepath}: {e}', exc_info=True)
         raise
@@ -13,7 +13,7 @@ def read_file(filepath):
         logging.warning('Data in the file has no rows, only headers.')
 
     df.columns = [c.strip().lower() for c in df.columns]
-
+    #Check if all the mandatory columns are present
     required_cols = {'appointment_id', 'clinic_id', 'patient_id', 'created_at'}
     missing = required_cols.difference(df.columns)
     if missing:

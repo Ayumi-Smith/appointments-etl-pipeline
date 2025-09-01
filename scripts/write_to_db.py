@@ -19,26 +19,29 @@ def write_processed_data_to_db (data, db_path: str = DB_PATH):
 
 
 
-def add_processed_filename_to_db(filename: str, db_path: str = DB_PATH):
-    #Add filename to DB to consider "seen" by the script
+def add_filename_to_db(filename: str, db_path: str = DB_PATH):
+    #Add filename and date to DB to consider "seen" by the script
     con = sqlite3.connect(db_path)
     cur = con.cursor()
-    cur.execute(
-        'INSERT OR IGNORE INTO processed_files (filename, processed_date) VALUES (?, NULL)',
-        (filename,)
-    )
+    cur.execute("""
+        INSERT OR IGNORE INTO processed_files (filename, processed_date)
+        VALUES (?, ?)
+    """, (filename, date.today().isoformat()))
     con.commit()
     con.close()
 
 
-def add_processed_time_to_db(filename: str, db_path: str = DB_PATH):
-    #Add processed date to DB to consider "processed" by the script
+def add_status_to_files_in_db(filename: str, status: str, db_path: str = DB_PATH):
+    #Updates status for files in db: "Processed" or "Failed"
     con = sqlite3.connect(db_path)
     cur = con.cursor()
-    cur.execute(
-        'UPDATE processed_files SET processed_date = ? WHERE filename = ?',
-        (date.today().isoformat(), filename)
-    )
+    #if the column doesn't exist
+    try:
+        cur.execute("ALTER TABLE processed_files ADD COLUMN status TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    cur.execute('UPDATE processed_files SET status = ? WHERE filename = ?', (status, filename))
     con.commit()
     con.close()
 

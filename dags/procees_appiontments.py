@@ -4,17 +4,17 @@ from airflow import DAG
 from pathlib import Path
 from airflow.decorators import dag, task
 from datetime import datetime, timedelta
-from scripts import read_files as rf
-from scripts import transform_file as tf
+from scripts import finding_unprocessed_files as ff
+from scripts import read_and_transform_file as rtf
 from scripts import write_to_db as wdb
 import logging
 
 
 @task
 def find_unprocessed_files(folder):
-    rf.init_db()
+
     logging.info('Check for new files.')
-    unprocessed_files = rf.get_unprocessed_files(folder)
+    unprocessed_files = ff.get_unprocessed_files(folder)
     if not unprocessed_files:
         logging.info('No new files found.')
     else:
@@ -27,19 +27,19 @@ def has_files(files: list[str]) -> bool:
 
 @task
 def process_files(folder, unprocessed_files):
-    for new_file in unprocessed_files:
-                logging.info(f'Processing file: {new_file}')
-                file_path = folder / new_file
-                wdb.add_processed_filename_to_db(new_file)
+    for unprocessed_file in unprocessed_files:
+                logging.info(f'Processing file: {unprocessed_file}')
+                file_path = folder / unprocessed_file
+                wdb.add_filename_to_db(unprocessed_file)
 
 
-                df = tf.read_file(file_path)
+                df = rtf.read_csv_file(file_path)
 
-                transformed_data = tf.clean_and_transform(df)
+                transformed_data = rtf.clean_and_transform(df)
 
                 wdb.write_processed_data_to_db(transformed_data)
-                wdb.add_processed_time_to_db(new_file)
-                logging.info(f'Processed the file {new_file}. Data pushed to the database.')
+                wdb.add_status_to_files_in_db(unprocessed_file, 'Processed')
+                logging.info(f'Processed the file {unprocessed_file}. Data pushed to the database.')
 
 
 

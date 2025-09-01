@@ -3,7 +3,7 @@ import sqlite3
 
 DB_PATH = '/opt/airflow/data/appointments.db'
 
-def init_db(db_path: str = DB_PATH):
+def init_filenames_table (db_path: str = DB_PATH):
     con = sqlite3.connect(db_path)
     cur = con.cursor()
     cur.execute('''
@@ -12,12 +12,10 @@ def init_db(db_path: str = DB_PATH):
             processed_date TEXT
         )
     ''')
-    # Useful index for lookups by name, too
-    cur.execute('CREATE INDEX IF NOT EXISTS idx_files_name ON processed_files(filename)')
     con.commit()
     con.close()    
 
-def csv_filenames(folder: Path) -> list[str]:
+def get_csv_filenames_from_folder(folder: Path) -> list[str]:
     return [f.name for f in folder.glob('*.csv')]
 
 def get_processed_filenames (db_path: str = DB_PATH):
@@ -28,8 +26,9 @@ def get_processed_filenames (db_path: str = DB_PATH):
     con.close()
     return rows
 
-def get_unprocessed_files (folder: Path, db_path: str = DB_PATH, recursive: bool = False):
-    all_files = csv_filenames(folder)
+def get_unprocessed_files (folder: Path, db_path: str = DB_PATH):
+    init_filenames_table()
+    all_files = get_csv_filenames_from_folder(folder)
     processed_files = get_processed_filenames(db_path)
     new_files = set(all_files) - processed_files
     return new_files
