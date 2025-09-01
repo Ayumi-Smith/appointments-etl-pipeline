@@ -1,54 +1,67 @@
-
-
+# deal with warning packages
 from airflow import DAG
 from pathlib import Path
 from airflow.decorators import dag, task
-from datetime import datetime, timedelta
+from datetime import datetime
 from scripts import finding_unprocessed_files as ff
-from scripts import read_and_transform_file as rtf
-from scripts import write_to_db as wdb
+from scripts import data_processing
+from scripts import db
+from scripts import read_file
 import logging
 
-
 @task
-def find_unprocessed_files(folder):
-
-    logging.info('Check for new files.')
-    unprocessed_files = ff.get_unprocessed_files(folder)
-    if not unprocessed_files:
-        logging.info('No new files found.')
-    else:
-        logging.info(f'Found {len(unprocessed_files)} file(s): {unprocessed_files}')
-        return unprocessed_files
+def get_unprocessed_filenames(source):
+    logging.info('Start checking for ne files...')
+    return ff.get_unprocessed_files(source)
 
 @task.short_circuit
-def has_files(files: list[str]) -> bool:
-    return bool(files)
+def has_files(unprocessed_files):
+    if not unprocessed_files:
+        logging.info('No new files found.')
+        return False
+    else:
+        logging.info(f'Found {len(unprocessed_files)} file(s): {unprocessed_files}')
+        return True
 
 @task
-def process_files(folder, unprocessed_files):
-    for unprocessed_file in unprocessed_files:
-                logging.info(f'Processing file: {unprocessed_file}')
-                file_path = folder / unprocessed_file
-                wdb.add_filename_to_db(unprocessed_file)
+def process_files(folder, unprocessed_filenames):
+    for filename in unprocessed_filenames:
+        try:
+            logging.info(f'Processing file: {filename}')
+
+            db.mark_file_as_processing(filename)
+
+            file_path = folder / filename
+            df = read_file.read_and_verify_headers(file_path)
+            if df.empty:
+                logging.warning(f'No content for handling in file {filename}. Skip.')
+                db.mark_file_as_empty(filename)
+                continue
+
+            transformed_data = data_processing.clean_and_transform(df)
+
+            if df.empty:
+                logging.warning(f'No valid content after cleanup & transforming data in file {filename}. Skip.')
+                db.mark_file_as_empty(filename)
+                continue
+
+            db.write_processed_data(transformed_data)
+
+            logging.info(f'Processed the file {filename}. Data pushed to the database.')
+            db.mark_file_as_processed(filename)
+        except Exception as e:
+            logging.error(f'Error during processing file {filename}: {e}')
+            db.mark_file_as_failed(filename)
 
 
-                df = rtf.read_csv_file(file_path)
-
-                transformed_data = rtf.clean_and_transform(df)
-
-                wdb.write_processed_data_to_db(transformed_data)
-                wdb.add_status_to_files_in_db(unprocessed_file, 'Processed')
-                logging.info(f'Processed the file {unprocessed_file}. Data pushed to the database.')
-
-
-
-@dag(start_date=datetime(2024,1,1), schedule="@once", catchup=False)
+@dag(start_date=datetime(2025,1,1), schedule="@once", catchup=False)
 def pipeline():
-    folder = Path('/opt/airflow/appointments_data')
-    unprocessed_files = find_unprocessed_files(folder)
-    gate = has_files(unprocessed_files)
-    proc = process_files(folder, unprocessed_files)
+    # for simplicity assume that files are always located under same path.
+    # can be moved into configuration.
+    source = Path('/opt/airflow/appointments_data')
+    unprocessed_filenames = get_unprocessed_filenames(source)
+    gate = has_files(unprocessed_filenames)
+    proc = process_files(source, unprocessed_filenames)
     gate >> proc
 
 dag = pipeline()

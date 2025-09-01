@@ -2,28 +2,6 @@ import pandas as pd
 import logging
 from datetime import datetime, timezone, date
 
-
-def read_csv_file(filepath):
-    try:
-        df = pd.read_csv(filepath) #if the files are big can be improved by reading in chunks
-    except Exception as e:
-        logging.error(f'Failed to read CSV at {filepath}: {e}', exc_info=True)
-        raise
-
-    if df.empty:
-        logging.warning('Data in the file has no rows, only headers.')
-
-    df.columns = [c.strip().lower() for c in df.columns]
-    #Check if all the mandatory columns are present
-    required_cols = {'appointment_id', 'clinic_id', 'patient_id', 'created_at'}
-    missing = required_cols.difference(df.columns)
-    if missing:
-        msg = f'Missing required column(s): {sorted(missing)}. Present columns: {list(df.columns)}'
-        logging.error(msg)
-        raise ValueError(msg)
-
-    return df
-
 def clean_and_validate_dates(df):
 
     if df['created_at'].isna().any():

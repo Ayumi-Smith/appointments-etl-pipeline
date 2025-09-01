@@ -1,41 +1,15 @@
-from pathlib import Path
-import sqlite3
+from scripts.db import get_processed_filenames
 
 DB_PATH = '/opt/airflow/data/appointments.db'
 
-def init_filenames_table (db_path: str = DB_PATH):
-    con = sqlite3.connect(db_path)
-    cur = con.cursor()
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS processed_files (
-            filename TEXT PRIMARY KEY,
-            processed_date TEXT
-        )
-    ''')
-    con.commit()
-    con.close()    
-
-def get_csv_filenames_from_folder(folder: Path) -> list[str]:
-    return [f.name for f in folder.glob('*.csv')]
-
-def get_processed_filenames (db_path: str = DB_PATH):
-    con = sqlite3.connect(db_path)
-    cur = con.cursor()
-    cur.execute('SELECT filename FROM processed_files')
-    rows = {r[0] for r in cur.fetchall()}
-    con.close()
-    return rows
-
-def get_unprocessed_files (folder: Path, db_path: str = DB_PATH):
+def get_unprocessed_files(folder):
     ''' Check between the filenames from the folder with files and filenames written to db.
     Assuming that since we are processing flow where files are loaded daily - we can load it all
     in memory for comparison '''
-
-    init_filenames_table()
     all_files = get_csv_filenames_from_folder(folder)
-    processed_files = get_processed_filenames(db_path)
+    processed_files = get_processed_filenames()
     new_files = set(all_files) - processed_files
     return new_files
 
-
-    
+def get_csv_filenames_from_folder(folder):
+    return [f.name for f in folder.glob('*.csv')]

@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from scripts.read_and_transform_file import clean_and_transform
-
+from scripts.data_processing import clean_and_transform
 
 def test_clean_and_transform_basic_transformation_counts_and_cleaning():
    #Correct data case
@@ -40,8 +39,6 @@ def test_clean_and_transform_basic_transformation_counts_and_cleaning():
 
 
     assert_frame_equal(result_sorted, expected_sorted)
-
-
 
 def test_clean_and_transform_dropping_missing_values_incorrect_date_formatting_and_aggregation():
 
@@ -84,7 +81,6 @@ def test_clean_and_transform_dropping_missing_values_incorrect_date_formatting_a
 
     assert_frame_equal(result_sorted, expected_sorted)
 
-
 def test_clean_and_transform_empty_df():
     #Check if the file only has column names, no rows
 
@@ -94,7 +90,6 @@ def test_clean_and_transform_empty_df():
 
     assert list(result.columns) == ['clinic_id', 'appointment_date', 'appointment_count']
     assert result.empty
-
 
 def test_clean_and_transform_all_missing_ids_results_empty():
     #Check if all values in 'appointment_id' are missing
@@ -113,8 +108,6 @@ def test_clean_and_transform_all_missing_ids_results_empty():
 
     assert list(result.columns) == expected_columns
     assert result.empty
-
-
 
 def test_clean_and_transform_ignores_additional_columns():
     # Extra columns should be ignored; output must be identical to what we'd get if only
