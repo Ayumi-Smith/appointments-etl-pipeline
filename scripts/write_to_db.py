@@ -2,7 +2,7 @@ import sqlite3
 from datetime import date
 import logging
 
-DB_PATH = 'appointments.db'
+DB_PATH = '/opt/airflow/data/appointments.db'
 
 def write_processed_data_to_db (data, db_path: str = DB_PATH):
     conn = sqlite3.connect(db_path)

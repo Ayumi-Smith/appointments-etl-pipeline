@@ -1,7 +1,7 @@
 from pathlib import Path
 import sqlite3
 
-DB_PATH = 'appointments.db'
+DB_PATH = '/opt/airflow/data/appointments.db'
 
 def init_db(db_path: str = DB_PATH):
     con = sqlite3.connect(db_path)

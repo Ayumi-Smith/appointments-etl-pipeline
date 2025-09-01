@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from transform_file import clean_and_transform
+from scripts.transform_file import clean_and_transform
 
 
 def test_clean_and_transform_basic_transformation_counts_and_cleaning():
