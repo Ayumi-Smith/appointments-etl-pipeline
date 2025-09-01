@@ -27,6 +27,10 @@ def get_processed_filenames (db_path: str = DB_PATH):
     return rows
 
 def get_unprocessed_files (folder: Path, db_path: str = DB_PATH):
+    ''' Check between the filenames from the folder with files and filenames written to db.
+    Assuming that since we are processing flow where files are loaded daily - we can load it all
+    in memory for comparison '''
+
     init_filenames_table()
     all_files = get_csv_filenames_from_folder(folder)
     processed_files = get_processed_filenames(db_path)
