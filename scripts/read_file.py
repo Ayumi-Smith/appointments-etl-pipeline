@@ -1,3 +1,5 @@
+import logging
+from scripts.notifications_handler import send_file_failure_notification
 import pandas as pd
 
 def read_and_verify_headers(filepath):
@@ -10,6 +12,10 @@ def read_and_verify_headers(filepath):
     df.columns = [c.strip().lower() for c in df.columns]
     required_cols = {'appointment_id', 'clinic_id', 'patient_id', 'created_at'}
     missing = required_cols.difference(df.columns)
+
     if missing:
-        raise ValueError(f'Missing required column(s): {sorted(missing)}. Present columns: {list(df.columns)}')
+        msg = f'Missing required column(s): {sorted(missing)}. Present columns: {list(df.columns)}'
+        send_file_failure_notification(filepath, msg)
+        raise ValueError(msg)
+
     return df

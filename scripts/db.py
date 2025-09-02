@@ -39,16 +39,20 @@ def mark_file_as_processing(filename):
     """, (filename, date.today().isoformat()))
     con.commit()
     con.close()
+    logging.info(f'Added filename {filename} to "processed_files" table.')
 
 
 def mark_file_as_processed(filename):
     _set_status(filename, 'Processed')
+    logging.info(f'Assigned status "Processed" to {filename}.')
 
 def mark_file_as_failed(filename):
     _set_status(filename,'Failed')
+    logging.info(f'Assigned status "Failed" to {filename}.')
 
 def mark_file_as_empty(filename):
     _set_status(filename, 'Empty')
+    logging.info(f'Assigned status "Empty" to {filename}.')
 
 def _set_status(filename, status):
     con = sqlite3.connect(DB_PATH)

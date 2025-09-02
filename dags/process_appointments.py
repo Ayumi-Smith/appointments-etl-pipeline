@@ -8,6 +8,8 @@ from scripts import data_processing
 from scripts import db
 from scripts import read_file
 import logging
+from scripts import notifications_handler as nh
+import requests
 
 @task
 def get_unprocessed_filenames(source):
@@ -17,7 +19,9 @@ def get_unprocessed_filenames(source):
 @task.short_circuit
 def has_files(unprocessed_files):
     if not unprocessed_files:
-        logging.info('No new files found.')
+        msg = 'No new files found.'
+        logging.info(msg)
+        nh.send_no_new_file_failure_notification()
         return False
     else:
         logging.info(f'Found {len(unprocessed_files)} file(s): {unprocessed_files}')
@@ -34,14 +38,18 @@ def process_files(folder, unprocessed_filenames):
             file_path = folder / filename
             df = read_file.read_and_verify_headers(file_path)
             if df.empty:
-                logging.warning(f'No content for handling in file {filename}. Skip.')
+                msg = f'No content for handling in file {filename}.'
+                logging.warning(msg)
+                nh.send_file_failure_notification(filename, msg)
                 db.mark_file_as_empty(filename)
                 continue
 
             transformed_data = data_processing.clean_and_transform(df)
 
             if transformed_data.empty:
-                logging.warning(f'No valid content after cleanup & transforming data in file {filename}. Skip.')
+                msg = f'No valid content after cleanup & transforming data in file {filename}.'
+                logging.warning(msg)
+                nh.send_file_failure_notification(filename, msg)
                 db.mark_file_as_empty(filename)
                 continue
 
@@ -51,8 +59,11 @@ def process_files(folder, unprocessed_filenames):
             db.mark_file_as_processed(filename)
 
         except Exception as e:
-            logging.error(f'Error during processing file {filename}: {e}')
+            msg = f'Error during processing file {filename}: {e}'
+            logging.error(msg)
             db.mark_file_as_failed(filename)
+            nh.send_file_failure_notification(filename, msg)
+
 
 
 @dag(

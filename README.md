@@ -38,19 +38,18 @@ to SQLite.
 
 ## How to run
 1) Clone the repository
-
 2) Place your CSV files into the appointments_data/ directory.
-
 3) Run Airflow in Docker:
-   - Start Airflow in the background:
-     `docker compose up -d`
-   - The first run may take a bit to pull the image. Follow logs if needed:
-     `docker compose logs -f airflow`
-
+   - Open Docker Desktop.
+   - Start Airflow in the background. (The first run may take a bit to pull the image.):
+        `docker compose up -d`
 4) Open Airflow UI
-- Visit http://localhost:8080
-- Follow the prompt in the logs to find credentials for the login. 
-
+   - Prepare your credentials for the Airflow UI:
+   check the logs `docker compose logs -f airflow`. On the very top you will find 
+   the username and password.
+   Alternatively, you can find the username and password in docker files under path:
+ /opt/airflow/simple_auth_manager_passwords.json.generate
+   - Visit http://localhost:8080.
 5) Trigger the pipeline
    - In Airflow UI, locate the DAG named "daily_appointments_count_aggregation".
    - Click “Play/Trigger” to start a run.
@@ -60,10 +59,10 @@ to SQLite.
      - Process each file, writing transformed data to SQLite
 
 6) Inspect outputs
-- SQLite files are written under ./data on your host (mounted into the container).
-- You can explore the DB with any SQLite browser.
+   - SQLite files are written under ./data on your host (mounted into the container).
+   - You can explore the DB with any SQLite browser.
 
-7) Stop Airflow
+7) Stop Docker and Airflow
    - `docker compose down`
 
 ## Alternative option to run locally
