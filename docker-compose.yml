@@ -12,19 +12,14 @@ services:
       - airflow_home:/opt/airflow
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
-      - ./config:/opt/airflow/config
-      - ./plugins:/opt/airflow/plugins
       - ./scripts:/opt/airflow/scripts
       - ./appointments_data:/opt/airflow/appointments_data:ro
       - ./data:/opt/airflow/data
     ports:
-      - "18080:8080"   # открываем как http://localhost:18080
+      - "8080:8080"   #  http://localhost:18080
     command: standalone
     restart: unless-stopped
 
-#    cpus: "1.5"          # максимум ~1.5 CPU
-#    mem_limit: "2g"      # максимум 2 GB RAM
-#    mem_reservation: "1g" # мягкий резерв, чтобы не выгоняли из памяти
 
 volumes:
   airflow_home:

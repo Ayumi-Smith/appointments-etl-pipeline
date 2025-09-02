@@ -40,7 +40,7 @@ def process_files(folder, unprocessed_filenames):
 
             transformed_data = data_processing.clean_and_transform(df)
 
-            if df.empty:
+            if transformed_data.empty:
                 logging.warning(f'No valid content after cleanup & transforming data in file {filename}. Skip.')
                 db.mark_file_as_empty(filename)
                 continue
@@ -49,14 +49,21 @@ def process_files(folder, unprocessed_filenames):
 
             logging.info(f'Processed the file {filename}. Data pushed to the database.')
             db.mark_file_as_processed(filename)
+
         except Exception as e:
             logging.error(f'Error during processing file {filename}: {e}')
             db.mark_file_as_failed(filename)
 
 
-@dag(start_date=datetime(2025,1,1), schedule="@once", catchup=False)
-def pipeline():
-    # for simplicity assume that files are always located under same path.
+@dag(
+    start_date=datetime(2025,1,1),
+    schedule="@daily",
+    catchup=False
+    # placeholder for global Slack notification on failure (I can't test it, therefore
+    # not putting the code at this point)
+)
+def daily_appointments_count_aggregation():
+    # for simplicity assume that files are always located under the same path.
     # can be moved into configuration.
     source = Path('/opt/airflow/appointments_data')
     unprocessed_filenames = get_unprocessed_filenames(source)
@@ -64,4 +71,4 @@ def pipeline():
     proc = process_files(source, unprocessed_filenames)
     gate >> proc
 
-dag = pipeline()
+dag = daily_appointments_count_aggregation()

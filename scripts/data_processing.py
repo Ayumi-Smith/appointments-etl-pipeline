@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 from datetime import datetime, timezone, date
 
-def clean_and_validate_dates(df):
+def clean_and_transform_created_at(df):
 
     if df['created_at'].isna().any():
         df = df.dropna(subset=['created_at'])
@@ -27,7 +27,7 @@ def clean_and_validate_dates(df):
         df = df.loc[valid_date_mask]
     return df
 
-def clean_data (df):
+def clean_ids (df):
     #Assuming that if there are blank clinic ids - we are dropping the rows
     if df['clinic_id'].isna().any():
         df = df.dropna(subset=['clinic_id'])
@@ -44,9 +44,8 @@ def clean_data (df):
 
     return df
 
-def transform_data (df):
+def aggregate_appointments_per_clinic (df):
     df = df[['clinic_id', 'appointment_date']].copy()
-    #Aggregate the data into daily counts of appointments per clinic.
 
     aggregated = (
         df.groupby(['clinic_id', 'appointment_date'], as_index=False)
@@ -57,7 +56,7 @@ def transform_data (df):
     return aggregated
 
 def clean_and_transform(df):
-    df = clean_and_validate_dates(df)
-    df = clean_data(df)
-    df = transform_data(df)
+    df = clean_and_transform_created_at(df)
+    df = clean_ids(df)
+    df = aggregate_appointments_per_clinic(df)
     return df
