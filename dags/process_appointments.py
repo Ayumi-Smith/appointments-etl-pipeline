@@ -71,6 +71,7 @@ def process_files(unprocessed_filenames):
 def daily_appointments_count_aggregation():
     # for simplicity assume that files are always located under the same path.
     # can be moved into configuration.
+    db.init_db()
     unprocessed_filenames = get_unprocessed_filenames()
     gate = has_files(unprocessed_filenames)
     proc = process_files(unprocessed_filenames)

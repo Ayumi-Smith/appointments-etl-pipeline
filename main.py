@@ -43,6 +43,7 @@ def process_files(unprocessed_filenames):
 
 
 if __name__ == '__main__':
+    db.init_db()
     unprocessed_filenames = get_unprocessed_filenames()
     any_files = has_files(unprocessed_filenames)
     if any_files:
