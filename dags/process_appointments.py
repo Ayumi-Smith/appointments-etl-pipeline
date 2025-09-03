@@ -1,20 +1,17 @@
 # deal with warning packages
 from airflow import DAG
-from pathlib import Path
 from airflow.decorators import dag, task
 from datetime import datetime
-from scripts import finding_unprocessed_files as ff
 from scripts import data_processing
 from scripts import db
 from scripts import read_file
 import logging
 from scripts import notifications_handler as nh
-import requests
 
 @task
-def get_unprocessed_filenames(source):
-    logging.info('Start checking for ne files...')
-    return ff.get_unprocessed_files(source)
+def get_unprocessed_filenames():
+    logging.info('Start checking for new files...')
+    return read_file.get_unprocessed_files()
 
 @task.short_circuit
 def has_files(unprocessed_files):
@@ -28,15 +25,14 @@ def has_files(unprocessed_files):
         return True
 
 @task
-def process_files(folder, unprocessed_filenames):
+def process_files(unprocessed_filenames):
     for filename in unprocessed_filenames:
         try:
             logging.info(f'Processing file: {filename}')
 
             db.mark_file_as_processing(filename)
 
-            file_path = folder / filename
-            df = read_file.read_and_verify_headers(file_path)
+            df = read_file.read_and_verify_headers(filename)
             if df.empty:
                 msg = f'No content for handling in file {filename}.'
                 logging.warning(msg)
@@ -76,10 +72,9 @@ def process_files(folder, unprocessed_filenames):
 def daily_appointments_count_aggregation():
     # for simplicity assume that files are always located under the same path.
     # can be moved into configuration.
-    source = Path('/opt/airflow/appointments_data')
-    unprocessed_filenames = get_unprocessed_filenames(source)
+    unprocessed_filenames = get_unprocessed_filenames()
     gate = has_files(unprocessed_filenames)
-    proc = process_files(source, unprocessed_filenames)
+    proc = process_files(unprocessed_filenames)
     gate >> proc
 
 dag = daily_appointments_count_aggregation()

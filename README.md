@@ -7,7 +7,7 @@ aggregates daily appointment counts per clinic, and writes the results
 to SQLite. 
 
 ## What it does
-- Checks a folder for new CSV files with appointments data.
+- Checks a source folder for new CSV files with appointments data.
 - Validates schema and performs data-quality checks:
   - Required columns present
   - Valid datetimes

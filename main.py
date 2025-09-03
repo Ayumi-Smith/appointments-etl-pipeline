@@ -1,14 +1,11 @@
-from pathlib import Path
-from scripts import finding_unprocessed_files as ff
 from scripts import data_processing
 from scripts import db
 from scripts import read_file
 import logging
 
-
-def get_unprocessed_filenames(source):
+def get_unprocessed_filenames():
     logging.info('Start checking for ne files...')
-    return ff.get_unprocessed_files(source)
+    return read_file.get_unprocessed_files()
 
 def has_files(unprocessed_files):
     if not unprocessed_files:
@@ -24,9 +21,7 @@ def process_files(folder, unprocessed_filenames):
             logging.info(f'Processing file: {filename}')
 
             db.mark_file_as_processing(filename)
-
-            file_path = folder / filename
-            df = read_file.read_and_verify_headers(file_path)
+            df = read_file.read_and_verify_headers(filename)
             if df.empty:
                 logging.warning(f'No content for handling in file {filename}. Skip.')
                 db.mark_file_as_empty(filename)
@@ -40,7 +35,7 @@ def process_files(folder, unprocessed_filenames):
                 db.mark_file_as_empty(filename)
                 continue
 
-            logging.info(f'Processed the file {filename}. Data pushed to the database.')
+            logging.info(f'Finished processing the file {filename}.')
             db.mark_file_as_processed(filename)
         except Exception as e:
             logging.error(f'Error during processing file {filename}: {e}')
@@ -48,6 +43,5 @@ def process_files(folder, unprocessed_filenames):
 
 
 if __name__ == '__main__':
-    source = Path('appointments_data')
-    unprocessed_filenames = get_unprocessed_filenames(source)
-    process_files(source, unprocessed_filenames)
+    unprocessed_filenames = get_unprocessed_filenames()
+    process_files(unprocessed_filenames)

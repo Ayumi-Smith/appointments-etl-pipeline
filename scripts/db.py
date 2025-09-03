@@ -2,7 +2,11 @@ import sqlite3
 from datetime import date
 import logging
 
+# airflow path
 DB_PATH = '/opt/airflow/data/appointments.db'
+
+#use this for running locally from main.
+#DB_PATH = 'data/appointments.db'
 
 def get_processed_filenames():
     with sqlite3.connect(DB_PATH) as con:
