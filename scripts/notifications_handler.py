@@ -11,9 +11,10 @@ def send_file_failure_notification(filename, error_msg):
     }
     requests.post(NOTIFICATION_URL, json=msg)
 
-def send_no_new_file_failure_notification():
+# soft notify about no files in daily flow.
+def send_no_new_file_notification():
     msg = {
-        "status": "error",
+        "status": "warning",
         "message": "No new files were found in the source."
     }
     requests.post(NOTIFICATION_URL, json=msg)

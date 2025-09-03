@@ -16,9 +16,8 @@ def get_unprocessed_filenames():
 @task.short_circuit
 def has_files(unprocessed_files):
     if not unprocessed_files:
-        msg = 'No new files found.'
-        logging.info(msg)
-        nh.send_no_new_file_failure_notification()
+        logging.warning('No new files found.')
+        nh.send_no_new_file_notification()
         return False
     else:
         logging.info(f'Found {len(unprocessed_files)} file(s): {unprocessed_files}')

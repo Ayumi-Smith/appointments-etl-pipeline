@@ -15,7 +15,7 @@ def has_files(unprocessed_files):
         logging.info(f'Found {len(unprocessed_files)} file(s): {unprocessed_files}')
         return True
 
-def process_files(folder, unprocessed_filenames):
+def process_files(unprocessed_filenames):
     for filename in unprocessed_filenames:
         try:
             logging.info(f'Processing file: {filename}')
@@ -44,4 +44,6 @@ def process_files(folder, unprocessed_filenames):
 
 if __name__ == '__main__':
     unprocessed_filenames = get_unprocessed_filenames()
-    process_files(unprocessed_filenames)
+    any_files = has_files(unprocessed_filenames)
+    if any_files:
+        process_files(unprocessed_filenames)
