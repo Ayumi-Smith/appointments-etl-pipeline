@@ -18,6 +18,7 @@ to SQLite.
 - Aggregates:
   - Daily appointments per clinic 
 - Writes results to SQLite.
+- Sends a notification in case of warning or error.
 - Tracks file processing status to ensure idempotency and safe re-runs.
 
 ## Tech stack
@@ -47,6 +48,7 @@ to SQLite.
    - Prepare your credentials for the Airflow UI:
    check the logs `docker compose logs -f airflow`. On the very top you will find 
    the username and password.
+   ![img.png](docs/img.png)
    Alternatively, you can find the username and password in docker files under path:
  /opt/airflow/simple_auth_manager_passwords.json.generate
    - Visit http://localhost:8080.
@@ -61,6 +63,7 @@ to SQLite.
 6) Inspect outputs
    - SQLite files are written under ./data on your host (mounted into the container).
    - You can explore the DB with any SQLite browser.
+   - In case of error, check the notifications in the inbox on: https://webhook.site/#!/view/03075537-a273-451c-8f97-da4952dc434f/be24dbaa-db6f-4301-8c2a-2c36a175eb6e/1 under "Request Content."
 
 7) Stop Docker and Airflow
    - `docker compose down`
@@ -72,7 +75,6 @@ finding_unprocessed_files.py.
 - Make sure that "appointments_data" folder is located in the same directory as main.py.
 - Install pandas `pip install pandas`
 - Run `python main.py`
-
 
 
 
@@ -94,8 +96,9 @@ and **processed_files**
 | file1.csv | 2025-09-03   | Processed  |
 
 - This helps to ensure that only new files are processed every time the DAG is triggered.
-- For easy inspecting of potential failures — a status is being assigned to each file 
+- For easy inspecting of potential failures - a status is being assigned to each file 
 and written to the helper table.
+- For local runs I used webhook.site as a dummy notification endpoint - it requires no credentials and makes it easy to verify that the DAG sends alerts. 
 
 
 ## What can go wrong

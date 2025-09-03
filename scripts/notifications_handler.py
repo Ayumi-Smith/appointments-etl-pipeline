@@ -4,7 +4,6 @@ import requests
 NOTIFICATION_URL = 'https://webhook.site/03075537-a273-451c-8f97-da4952dc434f'
 
 def send_file_failure_notification(filename, error_msg):
-    #msg = f'Error occurred handling file:  {filename}. {error_msg}'
     msg = {
         "status": "error",
         "file": filename,
@@ -13,7 +12,6 @@ def send_file_failure_notification(filename, error_msg):
     requests.post(NOTIFICATION_URL, json=msg)
 
 def send_no_new_file_failure_notification():
-    #msg = 'ERROR: No new files were detected.'
     msg = {
         "status": "error",
         "message": "No new files were found in the source."

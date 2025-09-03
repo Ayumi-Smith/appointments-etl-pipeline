@@ -68,7 +68,7 @@ def process_files(folder, unprocessed_filenames):
 
 @dag(
     start_date=datetime(2025,1,1),
-    schedule="@daily",
+    schedule=None,
     catchup=False
     # placeholder for global Slack notification on failure (I can't test it, therefore
     # not putting the code at this point)
