@@ -12,6 +12,7 @@ def send_file_failure_notification(filename, error_msg):
     requests.post(NOTIFICATION_URL, json=msg)
 
 # soft notify about no files in daily flow.
+# can be changes to warning in case we are expecting new files every day with no exceptions
 def send_no_new_file_notification():
     msg = {
         "status": "warning",

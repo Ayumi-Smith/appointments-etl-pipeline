@@ -74,6 +74,7 @@ to SQLite.
 finding_unprocessed_files.py.
 - Make sure that "appointments_data" folder is located in the same directory as main.py.
 - Install pandas `pip install pandas`
+- In files: db.py and finding_unprocessed_files.py uncomment the local path variables.
 - Run `python main.py`
 
 
@@ -98,7 +99,7 @@ and **processed_files**
 - This helps to ensure that only new files are processed every time the DAG is triggered.
 - For easy inspecting of potential failures - a status is being assigned to each file 
 and written to the helper table.
-- For local runs I used webhook.site as a dummy notification endpoint - it requires no credentials and makes it easy to verify that the DAG sends alerts. 
+- For local runs webhook.site used as a dummy notification endpoint - it requires no credentials and makes it easy to verify that the DAG sends alerts. 
 
 
 ## What can go wrong
@@ -109,6 +110,8 @@ and written to the helper table.
 - Idempotency/processing state:
   - Files previously processed are skipped; if a corrupt file is replaced in the 
 folder with the same name - it won't be processed again.
+  - If data for the same day is released in two different files - writing to the DB will fail due to a unique constraint.
+  If the situation like this is expected, logic can be improved to handle this case.
 
 
     
