@@ -39,7 +39,7 @@ to SQLite.
 
 ## How to run
 1) Clone the repository
-2) Place your CSV files into the appointments_data/ directory.
+2) Create a directory named "appointments_data" in the root and place your CSV files there.
 3) Run Airflow in Docker:
    - Open Docker Desktop.
    - Start Airflow in the background. (The first run may take a bit to pull the image.):
